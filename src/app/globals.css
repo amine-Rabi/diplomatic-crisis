@@ -1,0 +1,530 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Diplomatic Crisis — Bureau of Diplomatic Affairs
+   Visual language: institutional ministry website (state.gov / gov.uk /
+   EEAS). Cream paper surfaces, navy masthead, hairline rules, serif
+   headlines, no parchment textures, no rubber-stamp ornament.
+   Class names preserved so components don't have to change structure.
+   ───────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --gov-bg: #f3efe6;          /* page background — institutional cream */
+  --gov-surface: #ffffff;     /* card surface */
+  --gov-surface-2: #faf7f0;   /* subtle alt surface */
+  --gov-surface-3: #ece7d8;   /* tinted band */
+
+  /* Navy — primary */
+  --gov-navy: #0c2340;
+  --gov-navy-2: #15355c;
+  --gov-navy-3: #1d4d80;
+
+  /* Diplomatic accents */
+  --gov-burgundy: #8a2026;       /* alerts / live status */
+  --gov-burgundy-deep: #5e1419;
+  --gov-gold: #b08a2a;           /* official seals */
+  --gov-gold-deep: #8a6914;
+
+  /* Text */
+  --gov-ink: #161b22;
+  --gov-ink-soft: #2d333b;
+  --gov-ink-muted: #5b6270;
+  --gov-ink-faint: #9097a0;
+
+  /* On-navy text (header bar) */
+  --gov-on-navy: #f7f3e8;
+  --gov-on-navy-muted: rgba(247, 243, 232, 0.7);
+
+  /* Rules */
+  --gov-rule: #d8d2c1;
+  --gov-rule-strong: #afa991;
+
+  /* ── Legacy aliases ── (kept so existing components don't break) */
+  --dc-paper: var(--gov-surface);
+  --dc-paper-2: var(--gov-surface-2);
+  --dc-paper-3: var(--gov-surface-3);
+  --dc-ink: var(--gov-ink);
+  --dc-ink-soft: var(--gov-ink-soft);
+  --dc-ink-muted: var(--gov-ink-muted);
+  --dc-ink-faint: var(--gov-ink-faint);
+  --dc-classified: var(--gov-burgundy);
+  --dc-classified-deep: var(--gov-burgundy-deep);
+  --dc-gold: var(--gov-gold);
+  --dc-gold-deep: var(--gov-gold-deep);
+  --dc-flag-blue: var(--gov-navy);
+  --dc-navy: var(--gov-navy);
+  --dc-navy-2: var(--gov-navy-2);
+  --dc-navy-3: var(--gov-navy-3);
+  --dc-steel: var(--gov-navy-2);
+  --dc-glow: var(--gov-navy);            /* on cream bg now */
+  --dc-glow-muted: var(--gov-ink-muted);
+  --dc-rule: var(--gov-rule);
+  --dc-rule-strong: var(--gov-rule-strong);
+
+  --pc-parchment: var(--gov-surface);
+  --pc-parchment-2: var(--gov-surface-2);
+  --pc-parchment-3: var(--gov-surface-3);
+  --pc-vellum: var(--gov-surface);
+  --pc-ink: var(--gov-ink);
+  --pc-ink-soft: var(--gov-ink-soft);
+  --pc-ink-muted: var(--gov-ink-muted);
+  --pc-ink-faint: var(--gov-ink-faint);
+  --pc-oxblood: var(--gov-burgundy);
+  --pc-oxblood-deep: var(--gov-burgundy-deep);
+  --pc-brass: var(--gov-gold);
+  --pc-brass-deep: var(--gov-gold-deep);
+  --pc-forest: #2f5d3f;
+  --pc-rule: var(--gov-rule);
+}
+
+@theme inline {
+  --color-background: var(--gov-bg);
+  --color-foreground: var(--gov-ink);
+  --font-display: "Source Serif 4", "Source Serif Pro", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+/* Every page wrapper — cream bg, no decoration */
+.page-root {
+  background: var(--gov-bg);
+  color: var(--gov-ink);
+}
+
+html, body {
+  background: var(--gov-bg);
+  color: var(--gov-ink);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  font-size: 16px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection { background: var(--gov-navy); color: var(--gov-on-navy); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gov-rule); border: 2px solid var(--gov-bg); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gov-rule-strong); }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Masthead — navy header bar used at the top of pages
+   ───────────────────────────────────────────────────────────────────────── */
+.gov-masthead {
+  background: var(--gov-navy);
+  color: var(--gov-on-navy);
+  border-bottom: 4px solid var(--gov-gold);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.gov-masthead-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.gov-tricolor {
+  height: 4px;
+  background: linear-gradient(
+    to right,
+    var(--gov-navy) 0 33.33%,
+    var(--gov-on-navy) 33.33% 66.66%,
+    var(--gov-burgundy) 66.66% 100%
+  );
+}
+
+/* Small institutional crest (replaces the old wax-seal medallion) */
+.gov-crest {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid var(--gov-gold);
+  background: var(--gov-navy);
+  color: var(--gov-gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+  position: relative;
+}
+.gov-crest::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1px solid rgba(176, 138, 42, 0.35);
+}
+.gov-crest-lg {
+  width: 76px;
+  height: 76px;
+  font-size: 24px;
+  border-width: 2px;
+}
+.gov-crest-on-cream {
+  background: var(--gov-surface);
+  color: var(--gov-navy);
+  border-color: var(--gov-gold);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Cards — clean white surfaces with hairline borders
+   (legacy class names: .doc-card, .doc-card-soft)
+   ───────────────────────────────────────────────────────────────────────── */
+.doc-card {
+  position: relative;
+  background: var(--gov-surface);
+  color: var(--gov-ink);
+  border: 1px solid var(--gov-rule);
+  border-top: 3px solid var(--gov-navy);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03), 0 8px 24px -16px rgba(12, 35, 64, 0.18);
+}
+.doc-card::before,
+.doc-card::after { content: none !important; }
+
+.doc-card-soft {
+  background: var(--gov-surface-2);
+  color: var(--gov-ink);
+  border: 1px solid var(--gov-rule);
+}
+
+.doc-card-navy {
+  background: var(--gov-navy);
+  color: var(--gov-on-navy);
+  border: 1px solid var(--gov-navy-2);
+  border-top: 3px solid var(--gov-gold);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Typography
+   ───────────────────────────────────────────────────────────────────────── */
+.display {
+  font-family: "Source Serif 4", "Source Serif Pro", Georgia, serif;
+  font-weight: 700;
+  color: var(--gov-navy);
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  text-transform: none;
+}
+
+.display-glow {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 700;
+  color: var(--gov-navy);
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  text-transform: none;
+}
+
+.prose-court {
+  font-family: "Inter", -apple-system, sans-serif;
+  color: var(--gov-ink);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Section labels — small caps tracking, in muted slate */
+.stamp,
+.stamp-ink {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  color: var(--gov-ink-muted);
+}
+.stamp { color: var(--gov-burgundy); }
+.stamp-ink { color: var(--gov-ink-soft); }
+.stamp-brass { color: var(--gov-gold-deep); }
+
+/* Eyebrow with leading bar — used for departmental labels */
+.dept-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 11px;
+  color: var(--gov-burgundy);
+}
+.dept-label::before {
+  content: "";
+  width: 24px;
+  height: 2px;
+  background: var(--gov-burgundy);
+}
+
+/* Hairline section divider */
+.rule-fancy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--gov-ink-muted);
+}
+.rule-fancy::before,
+.rule-fancy::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--gov-rule);
+}
+
+/* Status badges — top-right of cards */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 11px;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: var(--gov-surface-2);
+  border: 1px solid var(--gov-rule);
+  color: var(--gov-ink-soft);
+}
+.status-badge--live { color: var(--gov-burgundy); border-color: rgba(138, 32, 38, 0.35); background: rgba(138, 32, 38, 0.05); }
+.status-badge--official { color: var(--gov-navy); border-color: rgba(12, 35, 64, 0.25); }
+.status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-badge--live::before { animation: gov-blink 1.4s ease-in-out infinite; }
+
+/* Legacy .classified-stamp now styled as a small institutional tag */
+.classified-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 11px;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gov-burgundy);
+  background: rgba(138, 32, 38, 0.06);
+  border: 1px solid rgba(138, 32, 38, 0.4);
+  transform: none;
+}
+.classified-stamp::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gov-burgundy);
+}
+
+/* Legacy .wax-seal — now a small institutional crest medallion */
+.wax-seal {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--gov-surface);
+  border: 2px solid var(--gov-gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gov-navy);
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  position: relative;
+  transform: none;
+  box-shadow: 0 1px 4px rgba(12, 35, 64, 0.15);
+}
+.wax-seal::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(176, 138, 42, 0.35);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Buttons
+   ───────────────────────────────────────────────────────────────────────── */
+.btn-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 15px;
+  padding: 13px 28px;
+  background: var(--gov-navy);
+  color: var(--gov-on-navy);
+  border: 1px solid var(--gov-navy);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.06s ease;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+.btn-seal:hover:not(:disabled) {
+  background: var(--gov-navy-2);
+  border-color: var(--gov-navy-2);
+}
+.btn-seal:active:not(:disabled) { transform: translateY(1px); }
+.btn-seal:disabled {
+  background: var(--gov-rule);
+  color: var(--gov-ink-faint);
+  border-color: var(--gov-rule);
+  cursor: not-allowed;
+}
+
+/* Primary alert / live action — burgundy */
+.btn-alert {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 13px 28px;
+  background: var(--gov-burgundy);
+  color: var(--gov-on-navy);
+  border: 1px solid var(--gov-burgundy);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.btn-alert:hover:not(:disabled) { background: var(--gov-burgundy-deep); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-size: 14px;
+  padding: 11px 22px;
+  background: transparent;
+  color: var(--gov-navy);
+  border: 1px solid var(--gov-navy);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.btn-ghost:hover {
+  background: var(--gov-navy);
+  color: var(--gov-on-navy);
+}
+
+/* On a navy surface, ghost flips */
+.doc-card-navy .btn-ghost {
+  color: var(--gov-on-navy);
+  border-color: var(--gov-on-navy-muted);
+}
+.doc-card-navy .btn-ghost:hover {
+  background: var(--gov-on-navy);
+  color: var(--gov-navy);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Forms
+   ───────────────────────────────────────────────────────────────────────── */
+.ink-input {
+  width: 100%;
+  background: var(--gov-surface);
+  border: 1px solid var(--gov-rule-strong);
+  border-radius: 2px;
+  padding: 12px 14px;
+  color: var(--gov-ink);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 16px;
+  letter-spacing: 0.18em;
+  outline: none;
+  text-transform: uppercase;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.ink-input::placeholder { color: var(--gov-ink-faint); letter-spacing: 0.3em; }
+.ink-input:focus {
+  border-color: var(--gov-navy);
+  box-shadow: 0 0 0 3px rgba(12, 35, 64, 0.1);
+}
+
+.ink-textarea {
+  width: 100%;
+  background: var(--gov-surface);
+  border: 1px solid var(--gov-rule-strong);
+  border-radius: 2px;
+  padding: 14px 16px;
+  color: var(--gov-ink);
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  resize: none;
+  outline: none;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.ink-textarea::placeholder { color: var(--gov-ink-faint); }
+.ink-textarea:focus {
+  border-color: var(--gov-navy);
+  box-shadow: 0 0 0 3px rgba(12, 35, 64, 0.08);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Tables (used by Leaderboard)
+   ───────────────────────────────────────────────────────────────────────── */
+.gov-table-row {
+  border-bottom: 1px solid var(--gov-rule);
+  transition: background 0.1s ease;
+}
+.gov-table-row:hover { background: var(--gov-surface-2); }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Animations
+   ───────────────────────────────────────────────────────────────────────── */
+@keyframes ink-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ink-rise { animation: ink-rise 0.4s ease-out both; }
+
+@keyframes globe-spin { to { transform: rotate(360deg); } }
+.globe-spin { animation: globe-spin 24s linear infinite; transform-origin: center; }
+
+@keyframes gov-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.blip { animation: gov-blink 1.4s ease-in-out infinite; }
+
+@keyframes gov-spin { to { transform: rotate(360deg); } }
+.gov-spinner {
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--gov-rule);
+  border-top-color: var(--gov-navy);
+  border-radius: 50%;
+  animation: gov-spin 0.9s linear infinite;
+}
+
+.lift { transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04), 0 12px 28px -16px rgba(12, 35, 64, 0.25);
+}
