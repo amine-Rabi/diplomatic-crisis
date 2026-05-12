@@ -104,7 +104,7 @@ export default function MainMenu({ onEnterLobby, onOpenLeaderboard }: Props) {
             }}
           >
             A fictional geopolitical crisis breaks. You are the envoy. Compose a
-            tweet-length cable in the voice of your nation&apos;s ministry — an
+            response cable in the voice of your nation&apos;s ministry — an
             on-chain panel of AI judges then weighs your wit, plausibility, and
             diplomatic tone. The record is permanent.
           </p>

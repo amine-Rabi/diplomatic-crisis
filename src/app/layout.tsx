@@ -3,11 +3,11 @@ import "./globals.css";
 import { Providers } from "./Providers";
 
 export const metadata: Metadata = {
-  title: "Diplomatic Crisis — Tweet-Length Statecraft on GenLayer",
+  title: "Diplomatic Crisis on GenLayer",
   description:
-    "Multiplayer geopolitics simulator. Each round a fictional crisis breaks; every delegate has 120s to issue a tweet-length dispatch. AI judges score wit, plausibility, and diplomatic tone via GenLayer's Optimistic Democracy consensus.",
+    "Multiplayer geopolitics simulator. Each round a fictional crisis breaks; every delegate has 120s to issue a dispatch. AI judges score wit, plausibility, and diplomatic tone via GenLayer's Optimistic Democracy consensus.",
   openGraph: {
-    title: "Diplomatic Crisis — Tweet-Length Statecraft on GenLayer",
+    title: "Diplomatic Crisis on GenLayer",
     description:
       "Cable in 280 characters. Be witty. Be plausible. Don't start a war.",
     type: "website",

@@ -1,5 +1,5 @@
 // Fictional geopolitical crises. Each round the host rolls one — every
-// delegate must respond to the same crisis with a tweet-length dispatch.
+// delegate must respond to the same crisis with a dispatch.
 
 export function rollScenario(scenarios: string[], excluding: string[] = []): string {
   const pool = scenarios.filter((s) => !excluding.includes(s));
