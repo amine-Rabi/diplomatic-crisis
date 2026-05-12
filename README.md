@@ -45,7 +45,7 @@ npm run deploy:bradbury    # → Bradbury Testnet
 The deploy script prints a line like:
 
 ```
-NEXT_PUBLIC_STUDIONET_DIPLOMATIC_CRISIS=0x...
+CONTRACT_STUDIONET=0x...
 ```
 
 Paste that into `.env.local` and restart `npm run dev`. For Vercel, add the

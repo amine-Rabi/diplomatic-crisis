@@ -16,12 +16,10 @@ export const CHAIN_CHANGE_EVENT = "dc:chainchange";
 // ── Per-network contract addresses ────────────────────────────────────────────────────────
 const CONTRACTS: Record<NetworkId, Record<GameKey, string>> = {
   studionet: {
-    diplomatic_crisis:
-      process.env.NEXT_PUBLIC_STUDIONET_DIPLOMATIC_CRISIS || "",
+    diplomatic_crisis: process.env.CONTRACT_STUDIONET || "",
   },
   testnetBradbury: {
-    diplomatic_crisis:
-      process.env.NEXT_PUBLIC_BRADBURY_DIPLOMATIC_CRISIS || "",
+    diplomatic_crisis: process.env.CONTRACT_BRADBURY || "",
   },
 };
 

@@ -41,13 +41,13 @@ const account = createAccount(PK);
 const client = createClient({ chain: chains[NETWORK], account });
 
 const ENV_KEYS = {
-  studionet: "NEXT_PUBLIC_STUDIONET_DIPLOMATIC_CRISIS",
-  testnetBradbury: "NEXT_PUBLIC_BRADBURY_DIPLOMATIC_CRISIS",
+  studionet: "CONTRACT_STUDIONET",
+  testnetBradbury: "CONTRACT_BRADBURY",
 };
 const TARGET = {
   game: "diplomatic_crisis",
   file: "diplomatic_crisis.py",
-  envKey: ENV_KEYS[NETWORK] || "NEXT_PUBLIC_BRADBURY_DIPLOMATIC_CRISIS",
+  envKey: ENV_KEYS[NETWORK] || "CONTRACT_BRADBURY",
 };
 
 console.log(
