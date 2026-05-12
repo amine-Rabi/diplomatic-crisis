@@ -31,6 +31,7 @@ export default function Lobby({ onLeave, onStart }: Props) {
   const [players, setPlayers] = useState<PlayerInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("");
+  const [copied, setCopied] = useState(false);
   const networkRef = useRef<NetworkService | null>(null);
   const sessionCfgRef = useRef<{ rounds: number; duration: number }>({ rounds: 3, duration: 120 });
 
@@ -437,8 +438,18 @@ export default function Lobby({ onLeave, onStart }: Props) {
   // ────────────────────────────────────────────────────────────────────
   // BRIEFING ISSUED — seating chamber
   // ────────────────────────────────────────────────────────────────────
-  const seats = Array.from({ length: 6 });
   const cfg = sessionCfgRef.current;
+
+  const copyCode = async () => {
+    if (!roomCode) return;
+    try {
+      await navigator.clipboard.writeText(roomCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // ignore
+    }
+  };
 
   return (
     <div className="page-root min-h-screen">
@@ -498,7 +509,10 @@ export default function Lobby({ onLeave, onStart }: Props) {
           </div>
 
           <div className="text-center my-8">
-            <div
+            <button
+              type="button"
+              onClick={copyCode}
+              title="Click to copy"
               style={{
                 fontFamily: "IBM Plex Mono, monospace",
                 fontWeight: 600,
@@ -506,16 +520,22 @@ export default function Lobby({ onLeave, onStart }: Props) {
                 letterSpacing: "0.28em",
                 color: "var(--gov-navy)",
                 paddingLeft: "0.28em",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                lineHeight: 1.05,
               }}
             >
               {roomCode}
-            </div>
+            </button>
             <p
               className="prose-court italic mt-2"
               style={{ color: "var(--gov-ink-muted)", fontSize: 15 }}
             >
-              {mode === "host"
-                ? "Share this code — the delegation must assemble."
+              {copied
+                ? "Code copied to clipboard."
+                : mode === "host"
+                ? "Click the code to copy — the delegation must assemble."
                 : "You have been admitted to the chamber. Await the chair."}
             </p>
           </div>
@@ -532,7 +552,7 @@ export default function Lobby({ onLeave, onStart }: Props) {
             <Summary k="Rounds" v={mode === "host" ? String(cfg.rounds) : "—"} />
             <Summary k="Per round" v={mode === "host" ? `${cfg.duration}s` : "—"} />
             <Summary k="Max length" v="280 ch" />
-            <Summary k="Delegates" v={`${players.length} / 6`} />
+            <Summary k="Delegates" v={`${players.length}`} />
           </div>
 
           {/* Delegation */}
@@ -548,17 +568,15 @@ export default function Lobby({ onLeave, onStart }: Props) {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {seats.map((_, i) => {
-                const p = players[i];
-                const isChair = i === 0 && !!p;
+              {players.map((p, i) => {
+                const isChair = i === 0;
                 return (
                   <div
-                    key={i}
+                    key={p.peerId || p.address || i}
                     className="p-3 flex items-center gap-3"
                     style={{
                       border: "1px solid var(--gov-rule)",
-                      background: p ? "var(--gov-surface-2)" : "transparent",
-                      borderStyle: p ? "solid" : "dashed",
+                      background: "var(--gov-surface-2)",
                       borderLeft: isChair ? "3px solid var(--gov-burgundy)" : undefined,
                     }}
                   >
@@ -567,12 +585,7 @@ export default function Lobby({ onLeave, onStart }: Props) {
                         width: 30,
                         height: 30,
                         borderRadius: "50%",
-                        background: p
-                          ? isChair
-                            ? "var(--gov-burgundy)"
-                            : "var(--gov-navy)"
-                          : "transparent",
-                        border: p ? "none" : "1px dashed var(--gov-rule-strong)",
+                        background: isChair ? "var(--gov-burgundy)" : "var(--gov-navy)",
                         color: "var(--gov-on-navy)",
                         display: "flex",
                         alignItems: "center",
@@ -582,42 +595,27 @@ export default function Lobby({ onLeave, onStart }: Props) {
                         fontWeight: 700,
                       }}
                     >
-                      {p ? (isChair ? "★" : i + 1) : ""}
+                      {isChair ? "★" : i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      {p ? (
-                        <>
-                          <div
-                            className="font-mono truncate"
-                            style={{ fontSize: 12, color: "var(--gov-ink)" }}
-                          >
-                            {p.name}
-                          </div>
-                          <div
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontSize: 9,
-                              letterSpacing: "0.22em",
-                              textTransform: "uppercase",
-                              color: isChair ? "var(--gov-burgundy)" : "var(--gov-ink-muted)",
-                              fontWeight: 600,
-                            }}
-                          >
-                            {isChair ? "Chair" : "Delegate " + (i + 1)}
-                          </div>
-                        </>
-                      ) : (
-                        <div
-                          className="italic"
-                          style={{
-                            fontFamily: "Inter, sans-serif",
-                            fontSize: 13,
-                            color: "var(--gov-ink-faint)",
-                          }}
-                        >
-                          seat vacant
-                        </div>
-                      )}
+                      <div
+                        className="font-mono truncate"
+                        style={{ fontSize: 12, color: "var(--gov-ink)" }}
+                      >
+                        {p.name}
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: "Inter, sans-serif",
+                          fontSize: 9,
+                          letterSpacing: "0.22em",
+                          textTransform: "uppercase",
+                          color: isChair ? "var(--gov-burgundy)" : "var(--gov-ink-muted)",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {isChair ? "Chair" : "Delegate " + (i + 1)}
+                      </div>
                     </div>
                   </div>
                 );

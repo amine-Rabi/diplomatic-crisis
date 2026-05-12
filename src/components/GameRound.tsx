@@ -325,10 +325,10 @@ export default function GameRound({ ctx, onFinish, onAbort }: Props) {
             className="btn-seal w-full"
           >
             {state === "submitting"
-              ? "Transmitting on Chain…"
+              ? "Submitting on Chain…"
               : state === "submitted"
               ? "✓ Cable Logged"
-              : `Transmit — Round ${ROMAN[round.round - 1]}`}
+              : `Submit ${ROMAN[round.round - 1]}`}
           </button>
         </div>
       </div>
