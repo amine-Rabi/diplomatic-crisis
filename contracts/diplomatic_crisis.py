@@ -105,6 +105,12 @@ class DiplomaticCrisis(gl.Contract):
         num_players = len(all_addresses)
         num_rounds = len(rounds)
 
+        # Committed roster the LLM MUST score — normalized to lowercase hex.
+        # Validators bind the leader's output to exactly this set so a
+        # well-shaped but fabricated response cannot invent, drop, or
+        # duplicate delegates to redirect XP.
+        committed_roster = frozenset(a.lower() for a in all_addresses)
+
         rounds_text = ""
         for r in rounds:
             rounds_text += f"\n--- Round {r['round']} | Crisis: {r['scenario']} ---\n"
@@ -113,7 +119,7 @@ class DiplomaticCrisis(gl.Contract):
 
         prompt = f"""You are an impartial AI panel scoring DIPLOMATIC CRISIS, a {num_rounds}-round geopolitical simulation on the GenLayer blockchain.
 
-Each round, every delegate is presented the SAME fictional geopolitical crisis and writes a tweet-length (≤280 char) diplomatic response. Your job is to evaluate each delegate's OVERALL performance across ALL rounds.
+Each round, every delegate is presented the SAME fictional geopolitical crisis and writes a (≤280 char) diplomatic response. Your job is to evaluate each delegate's OVERALL performance across ALL rounds.
 
 {rounds_text}
 
@@ -141,20 +147,50 @@ Return ONLY valid JSON with this exact schema:
             results = result.get("results")
             if not isinstance(results, list) or len(results) == 0:
                 raise Exception("Missing results array")
+
+            # Reconcile every scored entry back to a committed roster address
+            # (case-insensitive). Reject foreign/duplicate addresses so the
+            # leader never emits a roster the validators would (correctly)
+            # slash. Scores stay as the LLM produced them.
+            normalized = {}
             for r in results:
+                addr = r.get("address")
+                if not isinstance(addr, str):
+                    raise Exception("result missing address")
+                key = addr.lower()
+                if key not in committed_roster:
+                    raise Exception("scored an unknown delegate")
+                if key in normalized:
+                    raise Exception("duplicate delegate in results")
                 wit = max(0, min(100, int(round(float(r.get("wit", 50))))))
                 plaus = max(0, min(100, int(round(float(r.get("plausibility", 50))))))
                 tone = max(0, min(100, int(round(float(r.get("diplomatic_tone", 50))))))
-                r["wit"] = wit
-                r["plausibility"] = plaus
-                r["diplomatic_tone"] = tone
-                r["total"] = int(round((wit + plaus + tone) / 3))
-                if not isinstance(r.get("verdict"), str) or len(r.get("verdict", "")) == 0:
-                    r["verdict"] = "The panel withholds comment."
-            results = sorted(results, key=lambda x: x["total"], reverse=True)
-            for i, r in enumerate(results):
+                verdict = r.get("verdict")
+                if not isinstance(verdict, str) or len(verdict) == 0:
+                    verdict = "The panel withholds comment."
+                normalized[key] = {
+                    "address": key,
+                    "wit": wit,
+                    "plausibility": plaus,
+                    "diplomatic_tone": tone,
+                    "total": int(round((wit + plaus + tone) / 3)),
+                    "verdict": verdict,
+                }
+
+            if set(normalized.keys()) != committed_roster:
+                raise Exception("results do not cover the committed roster")
+
+            # Deterministic ordering: total desc, then address for stable ties.
+            ordered = sorted(
+                normalized.values(),
+                key=lambda x: (-x["total"], x["address"]),
+            )
+            for i, r in enumerate(ordered):
                 r["rank"] = i + 1
-            return json.dumps({"results": results, "winner": results[0].get("address", "")}, sort_keys=True)
+            return json.dumps(
+                {"results": ordered, "winner": ordered[0]["address"]},
+                sort_keys=True,
+            )
 
         def validator_fn(leader_result) -> bool:
             if not isinstance(leader_result, gl.vm.Return):
@@ -168,21 +204,66 @@ Return ONLY valid JSON with this exact schema:
             results = data.get("results")
             if not isinstance(results, list) or len(results) == 0:
                 return False
+
+            # ---- Bind results to the committed roster ------------------
+            # The scored delegates must be EXACTLY the addresses that
+            # actually submitted entries for this game — no missing, extra,
+            # or duplicated addresses. This is the deterministic anchor the
+            # validator recomputes from on-chain state, independent of the
+            # leader's (nondeterministic) LLM output.
+            if len(results) != num_players:
+                return False
+            seen = set()
             for r in results:
                 if not isinstance(r, dict):
                     return False
-                if not isinstance(r.get("address"), str) or len(r.get("address", "")) < 10:
+                addr = r.get("address")
+                if not isinstance(addr, str):
                     return False
-                for key in ("wit", "plausibility", "diplomatic_tone"):
-                    val = r.get(key)
-                    if not isinstance(val, (int, float)):
+                norm = addr.lower()
+                if norm in seen:
+                    return False  # duplicate delegate
+                seen.add(norm)
+            if seen != committed_roster:
+                return False  # fabricated / mismatched roster
+
+            # ---- Verify per-delegate scoring + ranking invariants ------
+            prev_total = None
+            for i, r in enumerate(results):
+                wit = r.get("wit")
+                plaus = r.get("plausibility")
+                tone = r.get("diplomatic_tone")
+                for val in (wit, plaus, tone):
+                    if not isinstance(val, (int, float)) or isinstance(val, bool):
                         return False
                     if val < 0 or val > 100:
                         return False
+
+                total = r.get("total")
+                if not isinstance(total, (int, float)) or isinstance(total, bool):
+                    return False
+                # total must be the honest aggregate of the three metrics.
+                if int(total) != int(round((wit + plaus + tone) / 3)):
+                    return False
+
+                # rank must be dense and 1-based in listed order, and the
+                # list must be sorted by total descending.
+                if r.get("rank") != i + 1:
+                    return False
+                if prev_total is not None and total > prev_total:
+                    return False
+                prev_total = total
+
                 if not isinstance(r.get("verdict"), str):
                     return False
-            if not isinstance(data.get("winner"), str):
+
+            # ---- Bind the winner to the actual top-ranked delegate -----
+            winner = data.get("winner")
+            if not isinstance(winner, str):
                 return False
+            if winner.lower() != results[0].get("address", "").lower():
+                return False
+
             return True
 
         verdict_str = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)

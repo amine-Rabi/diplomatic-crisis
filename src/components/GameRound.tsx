@@ -15,7 +15,7 @@ interface Props {
 
 type RoundState = "input" | "submitting" | "submitted";
 
-const MAX_RESPONSE_LEN = 280; // tweet-length
+const MAX_RESPONSE_LEN = 280; 
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
@@ -298,7 +298,7 @@ export default function GameRound({ ctx, onFinish, onAbort }: Props) {
               value={response}
               onChange={(e) => setResponse(e.target.value.slice(0, MAX_RESPONSE_LEN))}
               disabled={state !== "input"}
-              placeholder="Compose your tweet-length cable. Be witty. Be plausible. Don't start a war."
+              placeholder="Compose your response cable. Be witty. Be plausible. Don't start a war."
               rows={4}
               className="ink-textarea"
             />
